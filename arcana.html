@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        .transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        
+        .transition-text {
+            color: #fde047;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(253, 224, 71, 0.7);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+        }
+        
+        .logo-container {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .member-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .member-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .btn-gold {
+            background: linear-gradient(135deg, #FDE047 0%, #F59E0B 100%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #F59E0B 0%, #FDE047 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Navpad styles */
+        .navpad {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: translateX(100px);
+            opacity: 0;
+        }
+
+        .navpad.visible {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .navpad.hidden {
+            transform: translateX(100px);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative">
+    <!-- Transition Overlay -->
+    <div class="transition-overlay">
+        <div class="transition-text"></div>
+    </div>
+
+    <!-- Navigation Pad -->
+    <div class="navpad fixed bottom-8 right-8 z-50 hidden">
+        <div class="bg-black bg-opacity-80 rounded-full p-2 shadow-lg">
+            <div class="flex flex-col gap-3">
+                <button onclick="showSection('main-menu')" class="w-12 h-12 rounded-full bg-yellow-400 text-black flex items-center justify-center hover:bg-yellow-300 transition-colors">
+                    <i class="fas fa-home"></i>
+                </button>
+                <button onclick="showSection('members')" class="w-12 h-12 rounded-full bg-yellow-400 text-black flex items-center justify-center hover:bg-yellow-300 transition-colors">
+                    <i class="fas fa-user-friends"></i>
+                </button>
+                <button onclick="showSection('bph')" class="w-12 h-12 rounded-full bg-yellow-400 text-black flex items-center justify-center hover:bg-yellow-300 transition-colors">
+                    <i class="fas fa-user-tie"></i>
+                </button>
+                <button onclick="showSection('honorable')" class="w-12 h-12 rounded-full bg-yellow-400 text-black flex items-center justify-center hover:bg-yellow-300 transition-colors">
+                    <i class="fas fa-medal"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Particle Background -->
+    <div id="particles-js" class="absolute inset-0 -z-10"></div>
+    
+    <!-- Small Header -->
+    <header class="bg-black text-yellow-400 py-2 px-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="font-bold text-sm md:text-base">ARCANA 24</div>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-yellow-300 transition-colors"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-yellow-300 transition-colors"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-yellow-300 transition-colors"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Menu Section -->
+    <section id="main-menu" class="section active min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        <div class="logo-container mb-8">
+            <div class="w-40 h-40 md:w-60 md:h-60 bg-yellow-400 rounded-full flex items-center justify-center shadow-xl border-4 border-black mx-auto">
+                <i class="fas fa-users text-6xl md:text-8xl text-black"></i>
+            </div>
+        </div>
+        
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-black mb-6">ARCANA 24</h1>
+            <p class="text-lg md:text-xl text-gray-700 leading-relaxed">
+                Tebas semuanya bjir 
+            </p>
+        </div>
+        
+        <div class="flex flex-col md:flex-row gap-6 mb-12 justify-center items-center">
+            <button onclick="showSection('members')" class="btn-gold text-black font-bold py-4 px-8 rounded-full transition-all duration-300 flex items-center gap-2">
+                <i class="fas fa-user-friends"></i> Anggota
+            </button>
+            <button onclick="showSection('bph')" class="btn-gold text-black font-bold py-4 px-8 rounded-full transition-all duration-300 flex items-center gap-2">
+                <i class="fas fa-user-tie"></i> Badan Pengurus Harian
+            </button>
+            <button onclick="showSection('honorable')" class="btn-gold text-black font-bold py-4 px-8 rounded-full transition-all duration-300 flex items-center gap-2">
+                <i class="fas fa-medal"></i> Honourable Mention
+            </button>
+        </div>
+        
+        <div class="absolute bottom-8 left-0 right-0 text-center">
+            <p class="text-gray-500">© 2025 Arcana. All rights reserved.</p>
+        </div>
+    </section>
+    
+    <!-- Members Section -->
+    <section id="members" class="section min-h-screen py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <button onclick="showSection('main-menu')" class="mb-8 flex items-center gap-2 text-yellow-600 hover:text-yellow-700 transition-colors">
+                <i class="fas fa-arrow-left"></i> Kembali ke Menu Utama
+            </button>
+            
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-black">Anggota Organisasi</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="members-grid">
+                <!-- Members will be loaded here -->
+            </div>
+        </div>
+    </section>
+    
+    <!-- BPH Section -->
+    <section id="bph" class="section min-h-screen py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <button onclick="showSection('main-menu')" class="mb-8 flex items-center gap-2 text-yellow-600 hover:text-yellow-700 transition-colors">
+                <i class="fas fa-arrow-left"></i> Kembali ke Menu Utama
+            </button>
+            
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-black">Badan Pengurus Harian</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bph-grid">
+                <!-- BPH members will be loaded here -->
+            </div>
+        </div>
+    </section>
+    
+    <!-- Honorable Mention Section -->
+    <section id="honorable" class="section min-h-screen py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <button onclick="showSection('main-menu')" class="mb-8 flex items-center gap-2 text-yellow-600 hover:text-yellow-700 transition-colors">
+                <i class="fas fa-arrow-left"></i> Kembali ke Menu Utama
+            </button>
+            
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-black">Honourable Mention</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="honorable-grid">
+                <!-- Honorable mentions will be loaded here -->
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        // Sample data for members
+        const members = [
+            { id: 1, name: "a", position: "Member", image: "" },
+            { id: 2, name: "a", position: "Member", image: "" },
+            { id: 3, name: "a", position: "Member", image: "" },
+            { id: 4, name: "a", position: "Member", image: "" },
+            { id: 5, name: "a", position: "Member", image: "" },
+            { id: 6, name: "a", position: "Member", image: "" },
+            { id: 7, name: "a", position: "Member", image: "" },
+            { id: 8, name: "a", position: "Member", image: "" },
+            { id: 9, name: "a", position: "Member", image: "" }
+        ];
+        
+        // Sample data for BPH
+        const bphMembers = [
+            { id: 1, name: "a", position: "Ketua", image: "" },
+            { id: 2, name: "a", position: "Wakil Ketua", image: "" },
+            { id: 3, name: "a", position: "Sekretaris", image: "" },
+            { id: 4, name: "a", position: "Bendahara", image: "" },
+            { id: 5, name: "a", position: "Sekretaris", image: "" },
+            { id: 6, name: "a", position: "Bendahara", image: "" }
+        ];
+        
+        // Sample data for honorable mentions
+        const honorableMentions = [
+            { id: 1, name: "a", position: "Founder", image: "" },
+            { id: 2, name: "a", position: "Advisor", image: "" },
+            { id: 3, name: "a", position: "Senior Consultant", image: "" }
+        ];
+        
+        // Function to show selected section with transition
+        function showSection(sectionId) {
+            const overlay = document.querySelector('.transition-overlay');
+            const transitionText = document.querySelector('.transition-text');
+            
+            // Set transition text based on button clicked
+            let text = '';
+            if (sectionId === 'members') text = 'Anggota Organisasi';
+            else if (sectionId === 'bph') text = 'Badan Pengurus Harian';
+            else if (sectionId === 'honorable') text = 'Honourable Mention';
+            
+            transitionText.textContent = text;
+            
+            // Show overlay
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'auto';
+            
+            // After delay, change section and hide overlay
+            setTimeout(() => {
+                document.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+                
+                // Load appropriate content
+                if (sectionId === 'members') {
+                    loadMembers();
+                } else if (sectionId === 'bph') {
+                    loadBPH();
+                } else if (sectionId === 'honorable') {
+                    loadHonorable();
+                }
+                
+                // Hide overlay after another delay
+                setTimeout(() => {
+                    overlay.style.opacity = '0';
+                    overlay.style.pointerEvents = 'none';
+                }, 500);
+            }, 1000);
+        }
+        
+        // Function to load members
+        function loadMembers() {
+            const grid = document.getElementById('members-grid');
+            grid.innerHTML = '';
+            
+            members.forEach(member => {
+                grid.innerHTML += `
+                    <div class="member-card bg-white rounded-xl overflow-hidden shadow-md border border-gray-100">
+                        <div class="h-48 bg-yellow-100 flex items-center justify-center">
+                            <img src="${member.image}" alt="${member.name}" class="h-full w-full object-cover">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-black mb-1">${member.name}</h3>
+                            <p class="text-yellow-600 font-medium">${member.position}</p>
+                            <div class="flex gap-3 mt-4">
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Function to load BPH
+        function loadBPH() {
+            const grid = document.getElementById('bph-grid');
+            grid.innerHTML = '';
+            
+            bphMembers.forEach(member => {
+                grid.innerHTML += `
+                    <div class="member-card bg-white rounded-xl overflow-hidden shadow-lg border-2 border-yellow-400">
+                        <div class="h-48 bg-yellow-100 flex items-center justify-center relative">
+                            <img src="${member.image}" alt="${member.name}" class="h-full w-full object-cover">
+                            <div class="absolute top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
+                                BPH
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-black mb-1">${member.name}</h3>
+                            <p class="text-yellow-600 font-medium">${member.position}</p>
+                            <div class="flex gap-3 mt-4">
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Function to load honorable mentions
+        function loadHonorable() {
+            const grid = document.getElementById('honorable-grid');
+            grid.innerHTML = '';
+            
+            honorableMentions.forEach(member => {
+                grid.innerHTML += `
+                    <div class="member-card bg-white rounded-xl overflow-hidden shadow-lg border-2 border-black">
+                        <div class="h-48 bg-yellow-100 flex items-center justify-center relative">
+                            <img src="${member.image}" alt="${member.name}" class="h-full w-full object-cover">
+                            <div class="absolute top-4 right-4 bg-black text-yellow-400 px-3 py-1 rounded-full text-sm font-bold">
+                                VIP
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-black mb-1">${member.name}</h3>
+                            <p class="text-yellow-600 font-medium">${member.position}</p>
+                            <div class="flex gap-3 mt-4">
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="w-8 h-8 rounded-full bg-black text-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black transition-colors">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Navpad visibility on scroll
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const navpad = document.querySelector('.navpad');
+            const st = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (st > lastScrollTop && st > 100) {
+                // Scrolling down - slide in from left
+                navpad.classList.remove('hidden');
+                navpad.classList.add('visible');
+            } else if (st <= 100) {
+                // At top of page - slide out to right
+                navpad.classList.remove('visible');
+                navpad.classList.add('hidden');
+            }
+            
+            lastScrollTop = st <= 0 ? 0 : st;
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize particles.js
+            particlesJS('particles-js', {
+                particles: {
+                    number: {
+                        value: 80,
+                        density: {
+                            enable: true,
+                            value_area: 800
+                        }
+                    },
+                    color: {
+                        value: "#fde047"
+                    },
+                    shape: {
+                        type: "circle",
+                        stroke: {
+                            width: 0,
+                            color: "#000000"
+                        }
+                    },
+                    opacity: {
+                        value: 0.5,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 1,
+                            opacity_min: 0.1,
+                            sync: false
+                        }
+                    },
+                    size: {
+                        value: 3,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 2,
+                            size_min: 0.3,
+                            sync: false
+                        }
+                    },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#fde047",
+                        opacity: 0.4,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 1,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false,
+                        attract: {
+                            enable: false,
+                            rotateX: 600,
+                            rotateY: 1200
+                        }
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: {
+                            enable: true,
+                            mode: "grab"
+                        },
+                        onclick: {
+                            enable: true,
+                            mode: "push"
+                        },
+                        resize: true
+                    },
+                    modes: {
+                        grab: {
+                            distance: 140,
+                            line_linked: {
+                                opacity: 1
+                            }
+                        },
+                        push: {
+                            particles_nb: 4
+                        }
+                    }
+                },
+                retina_detect: true
+            });
+        });
+    </script>
+</body>
+</html>
