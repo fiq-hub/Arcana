@@ -24,321 +24,627 @@
                 <i data-feather="rotate-ccw"></i>
                 Reset All
             </button>
+            <button id="saveAllBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all">
+                <i data-feather="save"></i>
+                Save All Timers
+            </button>
+            <button id="toggleHistoryBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all">
+                <i data-feather="clock"></i>
+                Show History
+            </button>
         </div>
-<div id="timersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div id="timersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Timers will be added here dynamically -->
+        </div>
+        
+        <!-- History Section -->
+        <div id="historySection" class="mt-12 bg-white rounded-lg shadow-md p-6 hidden">
+            <h2 class="text-2xl font-bold text-indigo-600 mb-4 flex items-center gap-2">
+                <i data-feather="clock"></i>
+                Timer History
+            </h2>
+            <div class="overflow-x-auto">
+                <table id="historyTable" class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-indigo-50">
+                            <th class="py-3 px-4 text-left border-b">Date</th>
+                            <th class="py-3 px-4 text-left border-b">Timer Name</th>
+                            <th class="py-3 px-4 text-left border-b">Duration</th>
+                            <th class="py-3 px-4 text-left border-b">Lap Count</th>
+                            <th class="py-3 px-4 text-left border-b">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- History rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex justify-between">
+                <button id="clearHistoryBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center gap-2">
+                    <i data-feather="trash-2"></i>
+                    Clear History
+                </button>
+                <button id="exportHistoryBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2">
+                    <i data-feather="download"></i>
+                    Export to CSV
+                </button>
+            </div>
         </div>
     </div>
 
-    <script src="components/timer-card.js"></script>
-    <script src="script.js"></script>
     <script>
-        feather.replace();
-    </script>
-<script src=""></script>
-</body>
-</html>
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-body {
-    font-family: 'Inter', sans-serif;
-    position: relative;
-    overflow: hidden;
-}
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create floating background elements
+            for (let i = 0; i < 3; i++) {
+                const bg = document.createElement('div');
+                bg.className = 'floating-bg';
+                bg.style.left = `${Math.random() * 100}%`;
+                bg.style.top = `${Math.random() * 100}%`;
+                bg.style.animationDuration = `${15 + Math.random() * 15}s`;
+                bg.style.animationDelay = `${Math.random() * 5}s`;
+                document.body.appendChild(bg);
+            }
 
-.floating-bg {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    opacity: 0.7;
-    background-image: url('https://i.imgur.com/X5wFZaH.png');
-    background-size: cover;
-    border-radius: 50%;
-    filter: blur(1px);
-    z-index: -1;
-    animation: float 15s infinite linear;
-}
+            const timersContainer = document.getElementById('timersContainer');
+            const addTimerBtn = document.getElementById('addTimerBtn');
+            const resetAllBtn = document.getElementById('resetAllBtn');
+            const saveAllBtn = document.getElementById('saveAllBtn');
+            const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
+            const historySection = document.getElementById('historySection');
+            const historyBody = document.getElementById('historyBody');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            const exportHistoryBtn = document.getElementById('exportHistoryBtn');
 
-@keyframes float {
-    0% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    25% {
-        transform: translate(100vw, 50vh) rotate(90deg);
-    }
-    50% {
-        transform: translate(50vw, 80vh) rotate(180deg);
-    }
-    75% {
-        transform: translate(80vw, 20vh) rotate(270deg);
-    }
-    100% {
-        transform: translate(0, 0) rotate(360deg);
-    }
-}
-.timer-card {
-    transition: all 0.3s ease;
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(5px);
-}
-.timer-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
+            // Load saved history from localStorage
+            let timerHistory = JSON.parse(localStorage.getItem('timerHistory')) || [];
+            renderHistoryTable();
 
-.time-display {
-    font-family: 'Courier New', monospace;
-}
+            // Initialize with 3 timers
+            for (let i = 1; i <= 3; i++) {
+                addNewTimer(`Timer ${i}`);
+            }
 
-/* Animation for active timers */
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
-}
+            addTimerBtn.addEventListener('click', () => {
+                const timerCount = document.querySelectorAll('timer-card').length + 1;
+                addNewTimer(`Timer ${timerCount}`);
+            });
 
-.active-timer {
-    animation: pulse 2s infinite;
-}
-</style>
-<script>
-    
-document.addEventListener('DOMContentLoaded', () => {
-    // Create floating background elements
-    for (let i = 0; i < 3; i++) {
-        const bg = document.createElement('div');
-        bg.className = 'floating-bg';
-        bg.style.left = `${Math.random() * 100}%`;
-        bg.style.top = `${Math.random() * 100}%`;
-        bg.style.animationDuration = `${15 + Math.random() * 15}s`;
-        bg.style.animationDelay = `${Math.random() * 5}s`;
-        document.body.appendChild(bg);
-    }
+            resetAllBtn.addEventListener('click', () => {
+                const timers = document.querySelectorAll('timer-card');
+                timers.forEach(timer => {
+                    timer.resetTimer();
+                });
+            });
 
-    const timersContainer = document.getElementById('timersContainer');
-const addTimerBtn = document.getElementById('addTimerBtn');
-    const resetAllBtn = document.getElementById('resetAllBtn');
-// Initialize with 3 timers
-    for (let i = 1; i <= 3; i++) {
-        addNewTimer(`Timer ${i}`);
-    }
-addTimerBtn.addEventListener('click', () => {
-        const timerCount = document.querySelectorAll('timer-card').length + 1;
-        addNewTimer(`Timer ${timerCount}`);
-    });
-
-    resetAllBtn.addEventListener('click', () => {
-        const timers = document.querySelectorAll('timer-card');
-        timers.forEach(timer => {
-            timer.resetTimer();
-        });
-    });
-function addNewTimer(initialName) {
-        const timerCard = document.createElement('timer-card');
-        timerCard.setAttribute('name', initialName);
-        timersContainer.appendChild(timerCard);
-    }
-});
-</script>
-<script>
-class TimerCard extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this._name = 'Timer';
-        this._time = 0;
-        this._isRunning = false;
-        this._interval = null;
-        this._lapTimes = [];
-    }
-
-    static get observedAttributes() {
-        return ['name'];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'name') {
-            this._name = newValue;
-            this.render(); // render kembali ketika atribut berubah
-        }
-    }
-
-    connectedCallback() {
-        this.render();
-    }
-
-    disconnectedCallback() {
-        if (this._interval) {
-            clearInterval(this._interval);
-        }
-    }
-
-    formatTime(ms) {
-        const date = new Date(ms);
-        const hours = date.getUTCHours().toString().padStart(2, '0');
-        const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = date.getUTCSeconds().toString().padStart(2, '0');
-        const milliseconds = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}.${milliseconds}`;
-    }
-    startTimer() {
-        if (this._isRunning) return;
-        this._isRunning = true;
-        const startTime = Date.now() - this._time;
-        this._interval = setInterval(() => {
-            this._time = Date.now() - startTime;
-            const display = this.shadowRoot.querySelector('.time-display');
-            if (display) display.textContent = this.formatTime(this._time);
-        }, 10);
-        const card = this.shadowRoot.querySelector('.timer-card');
-        if (card) card.classList.add('active-timer');
-        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
-        if (toggleBtn) {
-            toggleBtn.classList.remove('stopped');
-            toggleBtn.classList.add('running');
-            toggleBtn.innerHTML = '<i data-feather="pause"></i> Stop';
-            feather.replace();
-        }
-    }
-
-    stopTimer() {
-        if (!this._isRunning) return;
-        clearInterval(this._interval);
-        this._isRunning = false;
-        const card = this.shadowRoot.querySelector('.timer-card');
-        if (card) card.classList.remove('active-timer');
-        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
-        if (toggleBtn) {
-            toggleBtn.classList.remove('running');
-            toggleBtn.classList.add('stopped');
-            toggleBtn.innerHTML = '<i data-feather="play"></i> Start';
-            feather.replace();
-        }
-    }
-    resetTimer() {
-        this.stopTimer();
-        this._time = 0;
-        this._lapTimes = [];
-        const display = this.shadowRoot.querySelector('.time-display');
-        if (display) display.textContent = this.formatTime(0);
-        const laps = this.shadowRoot.querySelector('.laps-container');
-        if (laps) laps.innerHTML = '';
-        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
-        if (toggleBtn) {
-            toggleBtn.classList.remove('running');
-            toggleBtn.classList.add('stopped');
-            toggleBtn.innerHTML = '<i data-feather="play"></i> Start';
-            feather.replace();
-        }
-    }
-recordLap() {
-        if (!this._isRunning) return;
-        this._lapTimes.unshift({
-            time: this._time,
-            display: this.formatTime(this._time)
-        });
-        this.renderLaps();
-    }
-
-    renderLaps() {
-        const lapsContainer = this.shadowRoot.querySelector('.laps-container');
-        if (!lapsContainer) return;
-        lapsContainer.innerHTML = '';
-        this._lapTimes.forEach((lap, index) => {
-            const lapElement = document.createElement('div');
-            lapElement.className = 'flex justify-between py-2 border-b border-gray-200';
-            lapElement.innerHTML = `
-                <span class="text-gray-600">Lap ${this._lapTimes.length - index}</span>
-                <span class="font-mono">${lap.display}</span>
-            `;
-            lapsContainer.appendChild(lapElement);
-        });
-    }
-
-    setupEventListeners() {
-        // Pastikan elemen ada
-        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
-const resetBtn = this.shadowRoot.querySelector('.reset-btn');
-        const lapBtn = this.shadowRoot.querySelector('.lap-btn');
-        const nameInput = this.shadowRoot.querySelector('.name-input');
-
-        // Karena render membuat ulang DOM, kita pasang listener tiap render.
-        // Tidak perlu menghapus listener lama karena node lama sudah hilang.
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                if (this._isRunning) {
-                    this.stopTimer();
+            saveAllBtn.addEventListener('click', () => {
+                const timers = document.querySelectorAll('timer-card');
+                let savedCount = 0;
+                
+                timers.forEach(timer => {
+                    if (timer._time > 0) { // Only save if timer has been used
+                        saveTimerResult(timer);
+                        savedCount++;
+                    }
+                });
+                
+                if (savedCount > 0) {
+                    showNotification(`Saved ${savedCount} timer(s) to history`);
                 } else {
-                    this.startTimer();
+                    showNotification('No active timers to save', 'warning');
                 }
             });
-        }
-if (resetBtn) resetBtn.addEventListener('click', () => this.resetTimer());
-        if (lapBtn) lapBtn.addEventListener('click', () => this.recordLap());
-        if (nameInput) {
-            nameInput.addEventListener('change', (e) => {
-                this._name = e.target.value;
-                this.setAttribute('name', this._name);
+
+            toggleHistoryBtn.addEventListener('click', () => {
+                historySection.classList.toggle('hidden');
+                const icon = toggleHistoryBtn.querySelector('i');
+                if (historySection.classList.contains('hidden')) {
+                    toggleHistoryBtn.innerHTML = '<i data-feather="clock"></i> Show History';
+                } else {
+                    toggleHistoryBtn.innerHTML = '<i data-feather="eye-off"></i> Hide History';
+                }
+                feather.replace();
             });
-        }
-    }
 
-    render() {
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host { display: block; margin-bottom: 1.5rem; }
-                .timer-card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-                .timer-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
-                .name-input { border: none; font-size:1.25rem; font-weight:600; color:#4f46e5; background:transparent; border-bottom:2px solid transparent; padding:0.25rem 0; width:70%; }
-                .name-input:focus { outline:none; border-bottom-color:#4f46e5; }
-                .time-display { font-size:2.5rem; text-align:center; margin:1.5rem 0; color:#1f2937; font-family: monospace; }
-                .controls { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
-                button { flex:1; padding:0.5rem; border-radius:0.5rem; font-weight:500; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition: all 0.2s; cursor:pointer; border:none; }
-                .toggle-btn { background-color:#10b981; color:white; padding:1rem; font-size:1.2rem; }
-                .toggle-btn.stopped { background-color:#10b981; }
-                .toggle-btn.running { background-color:#ef4444; }
-.reset-btn { background-color:#f59e0b; color:white; }
-                .lap-btn { background-color:#3b82f6; color:white; }
-                .laps-title { font-weight:600; margin-bottom:0.5rem; color:#4b5563; }
-                .laps-container { max-height:200px; overflow-y:auto; }
-            </style>
+            clearHistoryBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear all history?')) {
+                    timerHistory = [];
+                    localStorage.setItem('timerHistory', JSON.stringify(timerHistory));
+                    renderHistoryTable();
+                    showNotification('History cleared');
+                }
+            });
 
-            <div class="timer-card">
-                <div class="timer-header">
-                    <input type="text" class="name-input" value="${this._name}" maxlength="20">
-                    <i data-feather="edit-2" class="text-indigo-500"></i>
-                </div>
+            exportHistoryBtn.addEventListener('click', () => {
+                exportHistoryToCSV();
+            });
 
-                <div class="time-display">${this.formatTime(this._time)}</div>
-                <div class="controls">
-                    <button class="toggle-btn"><i data-feather="play"></i> Start/Stop</button>
-                    <button class="reset-btn"><i data-feather="rotate-ccw"></i> Reset</button>
-                    <button class="lap-btn"><i data-feather="flag"></i> Lap</button>
-                </div>
-<div class="laps-title">Lap Times</div>
-                <div class="laps-container"></div>
-            </div>
-        `;
+            function addNewTimer(initialName) {
+                const timerCard = document.createElement('timer-card');
+                timerCard.setAttribute('name', initialName);
+                timersContainer.appendChild(timerCard);
+            }
 
-        // replace feather icons inside shadowRoot
-        // feather.replace() works on document; for shadowRoot we need to manually set svg.
-        // Simpler: render minimal icons or skip; but if you want feather in shadow, do this:
-        const icons = this.shadowRoot.querySelectorAll('i[data-feather]');
-        icons.forEach(i => {
-            const name = i.getAttribute('data-feather');
-            // create simple fallback svg using feather (if available globally)
-            if (window.feather && typeof window.feather.toSvg === 'function') {
-                i.outerHTML = window.feather.toSvg(name);
-            } else {
-                i.textContent = ''; // fallback
+            function saveTimerResult(timer) {
+                const now = new Date();
+                const historyEntry = {
+                    id: Date.now(),
+                    date: now.toLocaleString(),
+                    timerName: timer._name,
+                    duration: timer._time,
+                    durationFormatted: timer.formatTime(timer._time),
+                    lapCount: timer._lapTimes.length,
+                    laps: [...timer._lapTimes]
+                };
+                
+                timerHistory.unshift(historyEntry);
+                localStorage.setItem('timerHistory', JSON.stringify(timerHistory));
+                renderHistoryTable();
+            }
+
+            function renderHistoryTable() {
+                historyBody.innerHTML = '';
+                
+                if (timerHistory.length === 0) {
+                    historyBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="py-4 text-center text-gray-500">
+                                No history yet. Save some timers to see them here.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                timerHistory.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="py-3 px-4 border-b">${entry.date}</td>
+                        <td class="py-3 px-4 border-b">${entry.timerName}</td>
+                        <td class="py-3 px-4 border-b font-mono">${entry.durationFormatted}</td>
+                        <td class="py-3 px-4 border-b">${entry.lapCount}</td>
+                        <td class="py-3 px-4 border-b">
+                            <button class="view-laps-btn text-indigo-600 hover:text-indigo-800 flex items-center gap-1" data-id="${entry.id}">
+                                <i data-feather="list" class="w-4 h-4"></i>
+                                View Laps
+                            </button>
+                        </td>
+                    `;
+                    historyBody.appendChild(row);
+                });
+                
+                // Add event listeners to view laps buttons
+                document.querySelectorAll('.view-laps-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = parseInt(e.currentTarget.getAttribute('data-id'));
+                        const entry = timerHistory.find(item => item.id === id);
+                        if (entry) {
+                            showLapsModal(entry);
+                        }
+                    });
+                });
+                
+                feather.replace();
+            }
+
+            function showLapsModal(entry) {
+                // Create modal
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-indigo-600">Lap Details - ${entry.timerName}</h3>
+                                <button class="close-modal text-gray-500 hover:text-gray-700">
+                                    <i data-feather="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="mb-4">
+                                <p><strong>Date:</strong> ${entry.date}</p>
+                                <p><strong>Total Duration:</strong> <span class="font-mono">${entry.durationFormatted}</span></p>
+                            </div>
+                            <div class="max-h-64 overflow-y-auto">
+                                <table class="w-full border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="py-2 px-3 text-left">Lap</th>
+                                            <th class="py-2 px-3 text-left">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${entry.laps.map((lap, index) => `
+                                            <tr class="border-b">
+                                                <td class="py-2 px-3">Lap ${entry.laps.length - index}</td>
+                                                <td class="py-2 px-3 font-mono">${lap.display}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-6 flex justify-end">
+                                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Add event listeners
+                modal.querySelector('.close-modal').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+                
+                modal.querySelector('button.bg-indigo-600').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+                
+                // Close modal when clicking outside
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+                
+                feather.replace();
+            }
+
+            function exportHistoryToCSV() {
+                if (timerHistory.length === 0) {
+                    showNotification('No history to export', 'warning');
+                    return;
+                }
+                
+                let csvContent = "Date,Timer Name,Duration,Lap Count\n";
+                
+                timerHistory.forEach(entry => {
+                    csvContent += `"${entry.date}","${entry.timerName}","${entry.durationFormatted}",${entry.lapCount}\n`;
+                });
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `timer-history-${new Date().toISOString().slice(0, 10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('History exported successfully');
+            }
+
+            function showNotification(message, type = 'success') {
+                // Remove existing notification if any
+                const existingNotification = document.querySelector('.notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+                
+                const notification = document.createElement('div');
+                notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 transition-all duration-300 ${
+                    type === 'success' ? 'bg-green-500' : 'bg-amber-500'
+                }`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
             }
         });
+    </script>
 
-        // Pasang event listener setelah render() — ini yang penting
-        this.setupEventListeners();
-    }
-}
+    <script>
+        class TimerCard extends HTMLElement {
+            constructor() {
+                super();
+                this.attachShadow({ mode: 'open' });
+                this._name = 'Timer';
+                this._time = 0;
+                this._isRunning = false;
+                this._interval = null;
+                this._lapTimes = [];
+            }
 
-customElements.define('timer-card', TimerCard);
-</script>
+            static get observedAttributes() {
+                return ['name'];
+            }
 
+            attributeChangedCallback(name, oldValue, newValue) {
+                if (name === 'name') {
+                    this._name = newValue;
+                    this.render(); // render kembali ketika atribut berubah
+                }
+            }
+
+            connectedCallback() {
+                this.render();
+            }
+
+            disconnectedCallback() {
+                if (this._interval) {
+                    clearInterval(this._interval);
+                }
+            }
+
+            formatTime(ms) {
+                const date = new Date(ms);
+                const hours = date.getUTCHours().toString().padStart(2, '0');
+                const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+                const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+                const milliseconds = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
+                return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+            }
+            
+            startTimer() {
+                if (this._isRunning) return;
+                this._isRunning = true;
+                const startTime = Date.now() - this._time;
+                this._interval = setInterval(() => {
+                    this._time = Date.now() - startTime;
+                    const display = this.shadowRoot.querySelector('.time-display');
+                    if (display) display.textContent = this.formatTime(this._time);
+                }, 10);
+                const card = this.shadowRoot.querySelector('.timer-card');
+                if (card) card.classList.add('active-timer');
+                const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('stopped');
+                    toggleBtn.classList.add('running');
+                    toggleBtn.innerHTML = '<i data-feather="pause"></i> Stop';
+                    feather.replace();
+                }
+            }
+
+            stopTimer() {
+                if (!this._isRunning) return;
+                clearInterval(this._interval);
+                this._isRunning = false;
+                const card = this.shadowRoot.querySelector('.timer-card');
+                if (card) card.classList.remove('active-timer');
+                const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('running');
+                    toggleBtn.classList.add('stopped');
+                    toggleBtn.innerHTML = '<i data-feather="play"></i> Start';
+                    feather.replace();
+                }
+            }
+            
+            resetTimer() {
+                this.stopTimer();
+                this._time = 0;
+                this._lapTimes = [];
+                const display = this.shadowRoot.querySelector('.time-display');
+                if (display) display.textContent = this.formatTime(0);
+                const laps = this.shadowRoot.querySelector('.laps-container');
+                if (laps) laps.innerHTML = '';
+                const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('running');
+                    toggleBtn.classList.add('stopped');
+                    toggleBtn.innerHTML = '<i data-feather="play"></i> Start';
+                    feather.replace();
+                }
+            }
+            
+            recordLap() {
+                if (!this._isRunning) return;
+                this._lapTimes.unshift({
+                    time: this._time,
+                    display: this.formatTime(this._time)
+                });
+                this.renderLaps();
+            }
+
+            saveTimer() {
+                if (this._time === 0) {
+                    // Show notification or alert that timer hasn't been used
+                    return;
+                }
+                
+                // Dispatch custom event to save this timer
+                this.dispatchEvent(new CustomEvent('saveTimer', {
+                    detail: {
+                        timer: this
+                    },
+                    bubbles: true
+                }));
+            }
+
+            renderLaps() {
+                const lapsContainer = this.shadowRoot.querySelector('.laps-container');
+                if (!lapsContainer) return;
+                lapsContainer.innerHTML = '';
+                this._lapTimes.forEach((lap, index) => {
+                    const lapElement = document.createElement('div');
+                    lapElement.className = 'flex justify-between py-2 border-b border-gray-200';
+                    lapElement.innerHTML = `
+                        <span class="text-gray-600">Lap ${this._lapTimes.length - index}</span>
+                        <span class="font-mono">${lap.display}</span>
+                    `;
+                    lapsContainer.appendChild(lapElement);
+                });
+            }
+
+            setupEventListeners() {
+                // Pastikan elemen ada
+                const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+                const resetBtn = this.shadowRoot.querySelector('.reset-btn');
+                const lapBtn = this.shadowRoot.querySelector('.lap-btn');
+                const saveBtn = this.shadowRoot.querySelector('.save-btn');
+                const nameInput = this.shadowRoot.querySelector('.name-input');
+
+                // Karena render membuat ulang DOM, kita pasang listener tiap render.
+                // Tidak perlu menghapus listener lama karena node lama sudah hilang.
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => {
+                        if (this._isRunning) {
+                            this.stopTimer();
+                        } else {
+                            this.startTimer();
+                        }
+                    });
+                }
+                
+                if (resetBtn) resetBtn.addEventListener('click', () => this.resetTimer());
+                if (lapBtn) lapBtn.addEventListener('click', () => this.recordLap());
+                if (saveBtn) saveBtn.addEventListener('click', () => this.saveTimer());
+                if (nameInput) {
+                    nameInput.addEventListener('change', (e) => {
+                        this._name = e.target.value;
+                        this.setAttribute('name', this._name);
+                    });
+                }
+            }
+
+            render() {
+                this.shadowRoot.innerHTML = `
+                    <style>
+                        :host { display: block; margin-bottom: 1.5rem; }
+                        .timer-card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+                        .timer-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+                        .name-input { border: none; font-size:1.25rem; font-weight:600; color:#4f46e5; background:transparent; border-bottom:2px solid transparent; padding:0.25rem 0; width:70%; }
+                        .name-input:focus { outline:none; border-bottom-color:#4f46e5; }
+                        .time-display { font-size:2.5rem; text-align:center; margin:1.5rem 0; color:#1f2937; font-family: monospace; }
+                        .controls { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap: wrap; }
+                        button { flex:1; padding:0.5rem; border-radius:0.5rem; font-weight:500; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition: all 0.2s; cursor:pointer; border:none; min-width: 100px; }
+                        .toggle-btn { background-color:#10b981; color:white; padding:1rem; font-size:1.2rem; }
+                        .toggle-btn.stopped { background-color:#10b981; }
+                        .toggle-btn.running { background-color:#ef4444; }
+                        .reset-btn { background-color:#f59e0b; color:white; }
+                        .lap-btn { background-color:#3b82f6; color:white; }
+                        .save-btn { background-color:#8b5cf6; color:white; }
+                        .laps-title { font-weight:600; margin-bottom:0.5rem; color:#4b5563; }
+                        .laps-container { max-height:200px; overflow-y:auto; }
+                    </style>
+
+                    <div class="timer-card">
+                        <div class="timer-header">
+                            <input type="text" class="name-input" value="${this._name}" maxlength="20">
+                            <i data-feather="edit-2" class="text-indigo-500"></i>
+                        </div>
+
+                        <div class="time-display">${this.formatTime(this._time)}</div>
+                        <div class="controls">
+                            <button class="toggle-btn"><i data-feather="play"></i> Start/Stop</button>
+                            <button class="reset-btn"><i data-feather="rotate-ccw"></i> Reset</button>
+                            <button class="lap-btn"><i data-feather="flag"></i> Lap</button>
+                            <button class="save-btn"><i data-feather="save"></i> Save</button>
+                        </div>
+                        <div class="laps-title">Lap Times</div>
+                        <div class="laps-container"></div>
+                    </div>
+                `;
+
+                // replace feather icons inside shadowRoot
+                // feather.replace() works on document; for shadowRoot we need to manually set svg.
+                // Simpler: render minimal icons or skip; but if you want feather in shadow, do this:
+                const icons = this.shadowRoot.querySelectorAll('i[data-feather]');
+                icons.forEach(i => {
+                    const name = i.getAttribute('data-feather');
+                    // create simple fallback svg using feather (if available globally)
+                    if (window.feather && typeof window.feather.toSvg === 'function') {
+                        i.outerHTML = window.feather.toSvg(name);
+                    } else {
+                        i.textContent = ''; // fallback
+                    }
+                });
+
+                // Pasang event listener setelah render() — ini yang penting
+                this.setupEventListeners();
+            }
+        }
+
+        customElements.define('timer-card', TimerCard);
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .floating-bg {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            opacity: 0.7;
+            background-image: url('https://i.imgur.com/X5wFZaH.png');
+            background-size: cover;
+            border-radius: 50%;
+            filter: blur(1px);
+            z-index: -1;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(100vw, 50vh) rotate(90deg);
+            }
+            50% {
+                transform: translate(50vw, 80vh) rotate(180deg);
+            }
+            75% {
+                transform: translate(80vw, 20vh) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+        .timer-card {
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .timer-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .time-display {
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Animation for active timers */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+
+        .active-timer {
+            animation: pulse 2s infinite;
+        }
+        
+        .notification {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+</html>
