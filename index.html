@@ -13,7 +13,7 @@
     <div class="container mx-auto px-4 py-8">
         <header class="mb-12 text-center">
             <h1 class="text-4xl font-bold text-indigo-600 mb-2">semangat ngitung sms y</h1>
-            <p class="text-gray-600">dibikin mas mas baik hati bernama taufiq biar enak aja</p>
+            <p class="text-gray-600">dibikin mas baik hati</p>
         </header>
         <div class="flex justify-center gap-4 mb-8">
             <button id="addTimerBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all">
@@ -118,11 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const timersContainer = document.getElementById('timersContainer');
 const addTimerBtn = document.getElementById('addTimerBtn');
     const resetAllBtn = document.getElementById('resetAllBtn');
-// Initialize with 5 timers
-    for (let i = 1; i <= 5; i++) {
+// Initialize with 3 timers
+    for (let i = 1; i <= 3; i++) {
         addNewTimer(`Timer ${i}`);
     }
-    addTimerBtn.addEventListener('click', () => {
+addTimerBtn.addEventListener('click', () => {
         const timerCount = document.querySelectorAll('timer-card').length + 1;
         addNewTimer(`Timer ${timerCount}`);
     });
