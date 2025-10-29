@@ -35,7 +35,7 @@
     <script>
         feather.replace();
     </script>
-<script src=""></script>
+<script src="https://huggingface.co/deepsite/deepsite-badge.js"></script>
 </body>
 </html>
 <style>
@@ -141,7 +141,7 @@ function addNewTimer(initialName) {
 });
 </script>
 <script>
-    class TimerCard extends HTMLElement {
+class TimerCard extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -159,13 +159,12 @@ function addNewTimer(initialName) {
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'name') {
             this._name = newValue;
-            this.render();
+            this.render(); // render kembali ketika atribut berubah
         }
     }
 
     connectedCallback() {
         this.render();
-        this.setupEventListeners();
     }
 
     disconnectedCallback() {
@@ -180,55 +179,53 @@ function addNewTimer(initialName) {
         const minutes = date.getUTCMinutes().toString().padStart(2, '0');
         const seconds = date.getUTCSeconds().toString().padStart(2, '0');
         const milliseconds = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
-        
         return `${hours}:${minutes}:${seconds}.${milliseconds}`;
     }
 
     startTimer() {
         if (this._isRunning) return;
-        
         this._isRunning = true;
         const startTime = Date.now() - this._time;
-        
         this._interval = setInterval(() => {
             this._time = Date.now() - startTime;
-            this.shadowRoot.querySelector('.time-display').textContent = this.formatTime(this._time);
+            const display = this.shadowRoot.querySelector('.time-display');
+            if (display) display.textContent = this.formatTime(this._time);
         }, 10);
-        
-        this.shadowRoot.querySelector('.timer-card').classList.add('active-timer');
+        const card = this.shadowRoot.querySelector('.timer-card');
+        if (card) card.classList.add('active-timer');
     }
 
     stopTimer() {
         if (!this._isRunning) return;
-        
         clearInterval(this._interval);
         this._isRunning = false;
-        this.shadowRoot.querySelector('.timer-card').classList.remove('active-timer');
+        const card = this.shadowRoot.querySelector('.timer-card');
+        if (card) card.classList.remove('active-timer');
     }
 
     resetTimer() {
         this.stopTimer();
         this._time = 0;
         this._lapTimes = [];
-        this.shadowRoot.querySelector('.time-display').textContent = this.formatTime(0);
-        this.shadowRoot.querySelector('.laps-container').innerHTML = '';
+        const display = this.shadowRoot.querySelector('.time-display');
+        if (display) display.textContent = this.formatTime(0);
+        const laps = this.shadowRoot.querySelector('.laps-container');
+        if (laps) laps.innerHTML = '';
     }
 
     recordLap() {
         if (!this._isRunning) return;
-        
         this._lapTimes.unshift({
             time: this._time,
             display: this.formatTime(this._time)
         });
-        
         this.renderLaps();
     }
 
     renderLaps() {
         const lapsContainer = this.shadowRoot.querySelector('.laps-container');
+        if (!lapsContainer) return;
         lapsContainer.innerHTML = '';
-        
         this._lapTimes.forEach((lap, index) => {
             const lapElement = document.createElement('div');
             lapElement.className = 'flex justify-between py-2 border-b border-gray-200';
@@ -241,172 +238,82 @@ function addNewTimer(initialName) {
     }
 
     setupEventListeners() {
-        this.shadowRoot.querySelector('.start-btn').addEventListener('click', () => this.startTimer());
-        this.shadowRoot.querySelector('.stop-btn').addEventListener('click', () => this.stopTimer());
-        this.shadowRoot.querySelector('.reset-btn').addEventListener('click', () => this.resetTimer());
-        this.shadowRoot.querySelector('.lap-btn').addEventListener('click', () => this.recordLap());
-        
+        // Pastikan elemen ada
+        const startBtn = this.shadowRoot.querySelector('.start-btn');
+        const stopBtn = this.shadowRoot.querySelector('.stop-btn');
+        const resetBtn = this.shadowRoot.querySelector('.reset-btn');
+        const lapBtn = this.shadowRoot.querySelector('.lap-btn');
         const nameInput = this.shadowRoot.querySelector('.name-input');
-        nameInput.addEventListener('change', (e) => {
-            this._name = e.target.value;
-            this.setAttribute('name', this._name);
-        });
+
+        // Karena render membuat ulang DOM, kita pasang listener tiap render.
+        // Tidak perlu menghapus listener lama karena node lama sudah hilang.
+        if (startBtn) startBtn.addEventListener('click', () => this.startTimer());
+        if (stopBtn) stopBtn.addEventListener('click', () => this.stopTimer());
+        if (resetBtn) resetBtn.addEventListener('click', () => this.resetTimer());
+        if (lapBtn) lapBtn.addEventListener('click', () => this.recordLap());
+        if (nameInput) {
+            nameInput.addEventListener('change', (e) => {
+                this._name = e.target.value;
+                this.setAttribute('name', this._name);
+            });
+        }
     }
 
     render() {
         this.shadowRoot.innerHTML = `
             <style>
-                :host {
-                    display: block;
-                    margin-bottom: 1.5rem;
-                }
-                
-                .timer-card {
-                    background: white;
-                    border-radius: 0.75rem;
-                    padding: 1.5rem;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-                }
-                
-                .timer-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 1rem;
-                }
-                
-                .name-input {
-                    border: none;
-                    font-size: 1.25rem;
-                    font-weight: 600;
-                    color: #4f46e5;
-                    background: transparent;
-                    border-bottom: 2px solid transparent;
-                    padding: 0.25rem 0;
-                    width: 70%;
-                }
-                
-                .name-input:focus {
-                    outline: none;
-                    border-bottom-color: #4f46e5;
-                }
-                
-                .time-display {
-                    font-size: 2.5rem;
-                    text-align: center;
-                    margin: 1.5rem 0;
-                    color: #1f2937;
-                }
-                
-                .controls {
-                    display: flex;
-                    gap: 0.5rem;
-                    margin-bottom: 1.5rem;
-                }
-                
-                button {
-                    flex: 1;
-                    padding: 0.5rem;
-                    border-radius: 0.5rem;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.5rem;
-                    transition: all 0.2s;
-                }
-                
-                .start-btn {
-                    background-color: #10b981;
-                    color: white;
-                }
-                
-                .start-btn:hover {
-                    background-color: #059669;
-                }
-                
-                .stop-btn {
-                    background-color: #ef4444;
-                    color: white;
-                }
-                
-                .stop-btn:hover {
-                    background-color: #dc2626;
-                }
-                
-                .reset-btn {
-                    background-color: #f59e0b;
-                    color: white;
-                }
-                
-                .reset-btn:hover {
-                    background-color: #d97706;
-                }
-                
-                .lap-btn {
-                    background-color: #3b82f6;
-                    color: white;
-                }
-                
-                .lap-btn:hover {
-                    background-color: #2563eb;
-                }
-                
-                .laps-title {
-                    font-weight: 600;
-                    margin-bottom: 0.5rem;
-                    color: #4b5563;
-                }
-                
-                .laps-container {
-                    max-height: 200px;
-                    overflow-y: auto;
-                }
-                
-                @media (max-width: 768px) {
-                    .controls {
-                        flex-wrap: wrap;
-                    }
-                    
-                    button {
-                        min-width: calc(50% - 0.25rem);
-                    }
-                }
+                :host { display: block; margin-bottom: 1.5rem; }
+                .timer-card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+                .timer-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+                .name-input { border: none; font-size:1.25rem; font-weight:600; color:#4f46e5; background:transparent; border-bottom:2px solid transparent; padding:0.25rem 0; width:70%; }
+                .name-input:focus { outline:none; border-bottom-color:#4f46e5; }
+                .time-display { font-size:2.5rem; text-align:center; margin:1.5rem 0; color:#1f2937; font-family: monospace; }
+                .controls { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
+                button { flex:1; padding:0.5rem; border-radius:0.5rem; font-weight:500; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition: all 0.2s; cursor:pointer; border:none; }
+                .start-btn { background-color:#10b981; color:white; }
+                .stop-btn { background-color:#ef4444; color:white; }
+                .reset-btn { background-color:#f59e0b; color:white; }
+                .lap-btn { background-color:#3b82f6; color:white; }
+                .laps-title { font-weight:600; margin-bottom:0.5rem; color:#4b5563; }
+                .laps-container { max-height:200px; overflow-y:auto; }
             </style>
-            
+
             <div class="timer-card">
                 <div class="timer-header">
                     <input type="text" class="name-input" value="${this._name}" maxlength="20">
                     <i data-feather="edit-2" class="text-indigo-500"></i>
                 </div>
-                
+
                 <div class="time-display">${this.formatTime(this._time)}</div>
-                
+
                 <div class="controls">
-                    <button class="start-btn">
-                        <i data-feather="play"></i>
-                        Start
-                    </button>
-                    <button class="stop-btn">
-                        <i data-feather="pause"></i>
-                        Stop
-                    </button>
-                    <button class="reset-btn">
-                        <i data-feather="rotate-ccw"></i>
-                        Reset
-                    </button>
-                    <button class="lap-btn">
-                        <i data-feather="flag"></i>
-                        Lap
-                    </button>
+                    <button class="start-btn"><i data-feather="play"></i> Start</button>
+                    <button class="stop-btn"><i data-feather="pause"></i> Stop</button>
+                    <button class="reset-btn"><i data-feather="rotate-ccw"></i> Reset</button>
+                    <button class="lap-btn"><i data-feather="flag"></i> Lap</button>
                 </div>
-                
+
                 <div class="laps-title">Lap Times</div>
                 <div class="laps-container"></div>
             </div>
         `;
-        
-        feather.replace();
+
+        // replace feather icons inside shadowRoot
+        // feather.replace() works on document; for shadowRoot we need to manually set svg.
+        // Simpler: render minimal icons or skip; but if you want feather in shadow, do this:
+        const icons = this.shadowRoot.querySelectorAll('i[data-feather]');
+        icons.forEach(i => {
+            const name = i.getAttribute('data-feather');
+            // create simple fallback svg using feather (if available globally)
+            if (window.feather && typeof window.feather.toSvg === 'function') {
+                i.outerHTML = window.feather.toSvg(name);
+            } else {
+                i.textContent = ''; // fallback
+            }
+        });
+
+        // Pasang event listener setelah render() — ini yang penting
+        this.setupEventListeners();
     }
 }
 
