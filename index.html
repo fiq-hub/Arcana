@@ -181,7 +181,6 @@ class TimerCard extends HTMLElement {
         const milliseconds = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
         return `${hours}:${minutes}:${seconds}.${milliseconds}`;
     }
-
     startTimer() {
         if (this._isRunning) return;
         this._isRunning = true;
@@ -193,6 +192,13 @@ class TimerCard extends HTMLElement {
         }, 10);
         const card = this.shadowRoot.querySelector('.timer-card');
         if (card) card.classList.add('active-timer');
+        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+        if (toggleBtn) {
+            toggleBtn.classList.remove('stopped');
+            toggleBtn.classList.add('running');
+            toggleBtn.innerHTML = '<i data-feather="pause"></i> Stop';
+            feather.replace();
+        }
     }
 
     stopTimer() {
@@ -201,8 +207,14 @@ class TimerCard extends HTMLElement {
         this._isRunning = false;
         const card = this.shadowRoot.querySelector('.timer-card');
         if (card) card.classList.remove('active-timer');
+        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+        if (toggleBtn) {
+            toggleBtn.classList.remove('running');
+            toggleBtn.classList.add('stopped');
+            toggleBtn.innerHTML = '<i data-feather="play"></i> Start';
+            feather.replace();
+        }
     }
-
     resetTimer() {
         this.stopTimer();
         this._time = 0;
@@ -211,9 +223,15 @@ class TimerCard extends HTMLElement {
         if (display) display.textContent = this.formatTime(0);
         const laps = this.shadowRoot.querySelector('.laps-container');
         if (laps) laps.innerHTML = '';
+        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+        if (toggleBtn) {
+            toggleBtn.classList.remove('running');
+            toggleBtn.classList.add('stopped');
+            toggleBtn.innerHTML = '<i data-feather="play"></i> Start';
+            feather.replace();
+        }
     }
-
-    recordLap() {
+recordLap() {
         if (!this._isRunning) return;
         this._lapTimes.unshift({
             time: this._time,
@@ -239,17 +257,23 @@ class TimerCard extends HTMLElement {
 
     setupEventListeners() {
         // Pastikan elemen ada
-        const startBtn = this.shadowRoot.querySelector('.start-btn');
-        const stopBtn = this.shadowRoot.querySelector('.stop-btn');
-        const resetBtn = this.shadowRoot.querySelector('.reset-btn');
+        const toggleBtn = this.shadowRoot.querySelector('.toggle-btn');
+const resetBtn = this.shadowRoot.querySelector('.reset-btn');
         const lapBtn = this.shadowRoot.querySelector('.lap-btn');
         const nameInput = this.shadowRoot.querySelector('.name-input');
 
         // Karena render membuat ulang DOM, kita pasang listener tiap render.
         // Tidak perlu menghapus listener lama karena node lama sudah hilang.
-        if (startBtn) startBtn.addEventListener('click', () => this.startTimer());
-        if (stopBtn) stopBtn.addEventListener('click', () => this.stopTimer());
-        if (resetBtn) resetBtn.addEventListener('click', () => this.resetTimer());
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                if (this._isRunning) {
+                    this.stopTimer();
+                } else {
+                    this.startTimer();
+                }
+            });
+        }
+if (resetBtn) resetBtn.addEventListener('click', () => this.resetTimer());
         if (lapBtn) lapBtn.addEventListener('click', () => this.recordLap());
         if (nameInput) {
             nameInput.addEventListener('change', (e) => {
@@ -270,9 +294,10 @@ class TimerCard extends HTMLElement {
                 .time-display { font-size:2.5rem; text-align:center; margin:1.5rem 0; color:#1f2937; font-family: monospace; }
                 .controls { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
                 button { flex:1; padding:0.5rem; border-radius:0.5rem; font-weight:500; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition: all 0.2s; cursor:pointer; border:none; }
-                .start-btn { background-color:#10b981; color:white; }
-                .stop-btn { background-color:#ef4444; color:white; }
-                .reset-btn { background-color:#f59e0b; color:white; }
+                .toggle-btn { background-color:#10b981; color:white; padding:1rem; font-size:1.2rem; }
+                .toggle-btn.stopped { background-color:#10b981; }
+                .toggle-btn.running { background-color:#ef4444; }
+.reset-btn { background-color:#f59e0b; color:white; }
                 .lap-btn { background-color:#3b82f6; color:white; }
                 .laps-title { font-weight:600; margin-bottom:0.5rem; color:#4b5563; }
                 .laps-container { max-height:200px; overflow-y:auto; }
@@ -285,15 +310,12 @@ class TimerCard extends HTMLElement {
                 </div>
 
                 <div class="time-display">${this.formatTime(this._time)}</div>
-
                 <div class="controls">
-                    <button class="start-btn"><i data-feather="play"></i> Start</button>
-                    <button class="stop-btn"><i data-feather="pause"></i> Stop</button>
+                    <button class="toggle-btn"><i data-feather="play"></i> Start/Stop</button>
                     <button class="reset-btn"><i data-feather="rotate-ccw"></i> Reset</button>
                     <button class="lap-btn"><i data-feather="flag"></i> Lap</button>
                 </div>
-
-                <div class="laps-title">Lap Times</div>
+<div class="laps-title">Lap Times</div>
                 <div class="laps-container"></div>
             </div>
         `;
