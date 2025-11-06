@@ -12,8 +12,8 @@
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <header class="mb-12 text-center">
-            <h1 class="text-4xl font-bold text-indigo-600 mb-2">ya allah</h1>
-            <p class="text-gray-600">ga logis cok ratusan sampel jadi terpaksa bikin web ini</p>
+            <h1 class="text-4xl font-bold text-indigo-600 mb-2">buat ngitung sms dan time travel :D</h1>
+            <p class="text-gray-600">dibikin mas baik hati nim 77</p>
         </header>
         <div class="flex justify-center gap-4 mb-8">
             <button id="addTimerBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all">
@@ -294,29 +294,57 @@
             }
 
             function exportHistoryToCSV() {
-                if (timerHistory.length === 0) {
-                    showNotification('No history to export', 'warning');
-                    return;
-                }
-                
-                let csvContent = "Date,Timer Name,Duration,Lap Count\n";
-                
-                timerHistory.forEach(entry => {
-                    csvContent += `"${entry.date}","${entry.timerName}","${entry.durationFormatted}",${entry.lapCount}\n`;
-                });
-                
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', `timer-history-${new Date().toISOString().slice(0, 10)}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                showNotification('History exported successfully');
-            }
+    if (timerHistory.length === 0) {
+        showNotification('No history to export', 'warning');
+        return;
+    }
+
+    // Cari lap maksimum untuk menentukan jumlah kolom
+    const maxLaps = Math.max(...timerHistory.map(h => h.laps.length));
+
+    // Buat header CSV
+    let csvContent = "Date,Timer Name,Duration,Lap Count\n";
+
+    for (let i = 1; i <= maxLaps; i++) {
+        csvContent += `,Lap ${i}`;
+    }
+    csvContent += "\n";
+
+    // Isi baris data
+    timerHistory.forEach(entry => {
+        let row = [
+            `"${entry.date}"`,
+            `"${entry.timerName}"`,
+            `"${entry.durationFormatted}"`,
+            entry.lapCount
+        ];
+
+        // Tambahkan lap times
+        entry.laps.forEach(lap => {
+            row.push(`"${lap.display}"`);
+        });
+
+        // Jika lap kurang dari max, tambahkan kolom kosong
+        for (let i = entry.laps.length; i < maxLaps; i++) {
+            row.push("");
+        }
+
+        csvContent += row.join(",") + "\n";
+    });
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `timer-history-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showNotification('History exported successfully');
+}
+
 
             function showNotification(message, type = 'success') {
                 // Remove existing notification if any
@@ -648,6 +676,3 @@
     </style>
 </body>
 </html>
-
-
-
